@@ -10,6 +10,11 @@ def get_checkpoint_template(config, model, optimizer, ):
     success_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks, 4) )
     loss_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks, 3) )
     proc_time_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks) )
+
+    import torch_xla.core.xla_model as xm
+
+    # optimizer.step()
+    # xm.mark_step()
     
     checkpoint = {
                   'epoch' : 0,
@@ -44,11 +49,14 @@ def save_initial_checkpoint_tpu_spmd( config, model, optimizer, chkpt_mgr ):
     tracked_steps = chkpt_mgr.all_steps()
     if( len(tracked_steps)==0 ):
         checkpoint = get_checkpoint_template(config, model, optimizer, )
-        chkpt_mgr.save_async( 0, checkpoint)
+        step = 0
+        if( chkpt_mgr.save_async(step, checkpoint) ):
+            print(f'Checkpoint is taken for step {step}') 
 
 def save_checkpoints_tpu_spmd( step, chkpt_mgr, checkpoint ):
 
-    chkpt_mgr.save_async(step, checkpoint)
+    if( chkpt_mgr.save_async(step, checkpoint) ):
+        print(f'Checkpoint is taken for step {step}')    
 
 def save_initial_checkpoint( config, model, optimizer,  ):
 
