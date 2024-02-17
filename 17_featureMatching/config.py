@@ -10,7 +10,7 @@ class Config:
         
         self.device = 'cpu'
         self.device = 'cuda'
-        # self.device = 'tpu'
+        self.device = 'tpu'
         
         self.tpu_cores = 'single'
         self.tpu_cores = 'multi'
@@ -29,10 +29,7 @@ class Config:
             
             self.home_dir = os.path.expanduser('~')
             
-            self.storage_local_or_bucket = 'bucket'    
-            
-            self.bucket_name = 'bucket-us-central1-relativeposeestimation'
-            self.bucket_name = 'bucket-europe-west4-relativeposeestimation'
+            self.storage_local_or_bucket = 'local'  
             
             self.TPU_DEBUG = 0
             # self.TPU_DEBUG = 1
@@ -40,47 +37,12 @@ class Config:
         else:
             self.storage_local_or_bucket = 'local'
         
-        self.first_experiment = 100
-        
-        # self.model_type = 'CNN_Plain'
-        # self.model_type = 'CNN_Residual'
-        # self.model_type = 'CNN_Residual_Context'        
-        # self.model_type = 'MobileNetV1'
-        # self.model_type = 'MobileNetV2'
-        # self.model_type = 'MobileNetV3'
-        
-        # self.model_type = 'model_exp'
-        # self.model_exp_no = 0
-        
-        # self.model_type = 'model_exp2'
-        # self.model_exp_no = 0
-        
-        # self.model_type = 'model_exp3'
-        # self.model_exp_no = 1
+        self.first_experiment = 1000
         
         self.model_type = 'model_exp4'
-        self.model_exp_no = 0
+        self.model_exp_no = 21
         
-        # self.model_type = 'model_exp5'
-        # self.model_exp_no = 1
-        
-        # self.model_type = 'model_exp6'
-        # self.model_exp_no = 1
-        
-        # self.model_type = 'model_exp7'
-        # self.model_exp_no = 1
-
-        # self.model_type = 'model_exp8'
-        # self.model_exp_no = 1
-        
-        # self.model_type = 'LTFGC'
-        # self.model_type = 'OANET'
-        # self.model_type = 'OANET_Iter'
-        
-        if( self.model_type == 'LTFGC' or self.model_type == 'OANET' or self.model_type == 'OANET_Iter'):
-            self.input_type = 'n_to_n'
-        else:
-            self.input_type = '1_to_1'
+        self.input_type = '1_to_1'            
         
         self.use_ratio = 0  # 0-> don't use, 1-> mask xs and ys, 2-> use as side
         self.use_mutual = 0  # 0-> don't use, 1-> mask xs and ys, 2-> use as side
@@ -103,7 +65,7 @@ class Config:
             # self.n_epochs = [500, 500, 0] # always cls loss
             self.n_epochs = [500, 0, 1] # only first chunk cls loss
             
-            self.early_finish_epoch = 20
+            self.early_finish_epoch = 10
         else:
             if(self.operation == 'train'):
                 # self.training_params = [ [ 32, 512, 32, ],  ]
@@ -136,7 +98,7 @@ class Config:
         self.file_name_test = 'yfcc-sift-2000-test.hdf5'
         
         if( self.device == 'tpu' ):
-            os.chdir( os.path.join(self.home_dir, '17_featureMatching') )
+            os.chdir( os.path.join(self.home_dir, 'checkpoint_SPMD_debug', '17_featureMatching') )
         
         self.input_path_bucket = '01_featureMatchingDatasets' 
         self.input_path_local = os.path.join('..', self.input_path_bucket)                
@@ -144,28 +106,7 @@ class Config:
         self.output_path_bucket = '08_featureMatchingOutputs'
         self.output_path_local = os.path.join('..', self.output_path_bucket)        
         
-        if(self.use_hdf5_or_picle == 'hdf5'):
-                        
-            if( self.device != 'tpu' ):
-            
-                self.num_workers = 3
-                
-                self.n_image_pairs_train = 541172
-                self.n_image_pairs_val = 6694
-                self.n_image_pairs_test = 4000
-                
-                system_ram_mb = 800_000
-                # system_ram_mb = 10
-                # system_ram_mb = 50
-                # system_ram_mb = 100
-                s_each_image_pair_apprx_mb = 0.05  
-                s_t_image_pair_apprx_mb = self.n_image_pairs_train * s_each_image_pair_apprx_mb * ( self.num_workers + 1 )
-                self.n_chunks = int( s_t_image_pair_apprx_mb / system_ram_mb ) + 1
-                self.n_chunk_files = 1
-            else:
-                raise NotImplementedError(f"The feature '{self.device}' is not implemented yet.")
-            
-        elif(self.use_hdf5_or_picle == 'pickle'):
+        if(self.use_hdf5_or_picle == 'pickle'):
             
             if( self.device != 'tpu' ):
                 if(self.operation == 'train'):

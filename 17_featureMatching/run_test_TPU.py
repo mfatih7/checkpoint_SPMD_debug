@@ -1,10 +1,8 @@
 from config import get_config
 
 from process.test_1_1_TPU_single import test as test_1_1_TPU_single_test
-from process.test_n_n_TPU_single import test as test_n_n_TPU_single_test
 
 from process.test_1_1_TPU_multi import test as test_1_1_TPU_multi_test
-from process.test_n_n_TPU_multi import test as test_n_n_TPU_multi_test
 
 from process.test_1_1_TPU_spmd import test as test_1_1_TPU_spmd_test
 
@@ -118,53 +116,7 @@ if __name__ == '__main__':
             else:
                 raise ValueError(f"The provided arguments are not valid: {N_images_in_batch} {N} {batch_size}")
             
-        elif(config.input_type == 'n_to_n'):
-            
-            if( N_images_in_batch == batch_size ):
-    
-                if( config.tpu_cores == 'single' ):
-                    
-                    learning_rate = config.learning_rate
-                    n_epochs = config.n_epochs
-                    num_workers = config.num_workers
-                    model_type = config.model_type
-                    en_grad_checkpointing = config.en_grad_checkpointing
-                    
-                    print('Testing starts for ' + 'test_n_n_TPU_single_test')
-                    
-                    test_results = test_n_n_TPU_single_test(   
-                                                            config,
-                                                            experiment_no,
-                                                            learning_rate,
-                                                            n_epochs,
-                                                            num_workers,
-                                                            model_type,
-                                                            en_grad_checkpointing,
-                                                            N_images_in_batch,
-                                                            N,
-                                                            batch_size, )
-                elif( config.tpu_cores == 'multi' ):
-                    
-                    print('Testing starts for ' + 'test_n_n_TPU_multi_test')
-                    
-                    FLAGS = {}
-                    FLAGS['config']                     = config
-                    FLAGS['experiment_no']              = experiment_no
-                    FLAGS['learning_rate']              = config.learning_rate * 8  # Learning Rate is increased for 8 cores operation
-                    FLAGS['n_epochs']                   = config.n_epochs
-                    FLAGS['num_workers']                = config.num_workers
-                    FLAGS['model_type']                 = config.model_type
-                    FLAGS['en_grad_checkpointing']      = config.en_grad_checkpointing
-                    FLAGS['N_images_in_batch']          = config.training_params[0][0]
-                    FLAGS['N']                          = config.training_params[0][1]
-                    FLAGS['batch_size']                 = config.training_params[0][2]
-                    
-                    xmp.spawn(test_n_n_TPU_multi_test, args=(FLAGS,) )
-                    
-                else:
-                    raise ValueError(f"The provided arguments are not valid: {config.tpu_cores}")                    
-            else:
-                raise ValueError(f"The provided arguments are not valid: {N_images_in_batch} {batch_size}")            
+        
         else:            
             raise ValueError(f"The provided arguments are not valid: {config.input_type}")
     else:
