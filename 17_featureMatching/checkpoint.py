@@ -11,7 +11,7 @@ def get_checkpoint_template(config, model, optimizer, ):
     loss_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks, 3) )
     proc_time_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks) )
 
-    import torch_xla.core.xla_model as xm
+    # import torch_xla.core.xla_model as xm
 
     # optimizer.step()
     # xm.mark_step()
