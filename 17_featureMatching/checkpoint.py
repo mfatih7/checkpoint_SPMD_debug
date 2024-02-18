@@ -9,7 +9,6 @@ import torch
 def make_optimizer_prime_spmd( optimizer, ):
 
     import torch_xla.core.xla_model as xm
-
     from torch.utils._pytree import tree_map
     def zero_grad(x):
         if isinstance(x, torch.Tensor) and x.requires_grad:
@@ -25,7 +24,8 @@ def get_checkpoint_template(config, model, optimizer, ):
     loss_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks, 3) )
     proc_time_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks) )
 
-    optimizer = make_optimizer_prime_spmd( optimizer, )
+    if( config.device == 'tpu' and config.tpu_cores == 'spmd' ):
+        optimizer = make_optimizer_prime_spmd( optimizer, )
 
     checkpoint = {
                   'epoch' : 0,
