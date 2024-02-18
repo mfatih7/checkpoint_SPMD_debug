@@ -6,15 +6,26 @@ import torch
 # import torch_xla.core.xla_model as xm
 # import torch_xla.utils.serialization as xser
 
+def make_optimizer_prime( optimizer, ):
+
+    import torch_xla.core.xla_model as xm
+
+    from torch.utils._pytree import tree_map
+    def zero_grad(x):
+        if isinstance(x, torch.Tensor) and x.requires_grad:
+            x.grad = torch.zeros_like(x, requires_grad=False)
+    tree_map(zero_grad, optimizer.param_groups)
+    optimizer.step()
+    xm.mark_step()
+
+    return optimizer
+
 def get_checkpoint_template(config, model, optimizer, ):
     success_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks, 4) )
     loss_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks, 3) )
     proc_time_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks) )
 
-    # import torch_xla.core.xla_model as xm
-
-    # optimizer.step()
-    # xm.mark_step()
+    optimizer = make_optimizer_prime( optimizer, )
     
     checkpoint = {
                   'epoch' : 0,
@@ -101,6 +112,7 @@ def load_checkpoint( config, device, model, optimizer, chkpt_mgr=None ):
                     checkpoint = xser.load( checkpoint_file_with_path )
                     break
             elif(config.tpu_cores == 'spmd'):
+                # optimizer = make_optimizer_prime( optimizer, )
                 checkpoint = get_checkpoint_template( config, model, optimizer, )
 
                 tracked_steps = chkpt_mgr.all_steps()
