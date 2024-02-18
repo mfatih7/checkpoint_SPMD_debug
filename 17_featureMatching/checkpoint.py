@@ -6,7 +6,7 @@ import torch
 # import torch_xla.core.xla_model as xm
 # import torch_xla.utils.serialization as xser
 
-def make_optimizer_prime( optimizer, ):
+def make_optimizer_prime_spmd( optimizer, ):
 
     import torch_xla.core.xla_model as xm
 
@@ -25,8 +25,8 @@ def get_checkpoint_template(config, model, optimizer, ):
     loss_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks, 3) )
     proc_time_checkpoint = np.zeros( (2, config.n_epochs[0], config.n_chunks) )
 
-    optimizer = make_optimizer_prime( optimizer, )
-    
+    optimizer = make_optimizer_prime_spmd( optimizer, )
+
     checkpoint = {
                   'epoch' : 0,
                   'chunk' : 0,
@@ -112,7 +112,6 @@ def load_checkpoint( config, device, model, optimizer, chkpt_mgr=None ):
                     checkpoint = xser.load( checkpoint_file_with_path )
                     break
             elif(config.tpu_cores == 'spmd'):
-                # optimizer = make_optimizer_prime( optimizer, )
                 checkpoint = get_checkpoint_template( config, model, optimizer, )
 
                 tracked_steps = chkpt_mgr.all_steps()
