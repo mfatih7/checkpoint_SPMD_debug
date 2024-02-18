@@ -209,7 +209,7 @@ class Config:
         chunk = 0
         if(self.storage_local_or_bucket == 'local'):
             while True:            
-                file_name_with_path = os.path.join(self.input_path_pickle_local, 'train' + f'_{chunk:04d}' + '.pkl')            
+                file_name_with_path = os.path.join(self.input_path_pickle_local, self.operation + f'_{chunk:04d}' + '.pkl')            
                 if os.path.isfile(file_name_with_path):
                     chunk += 1
                 else:
